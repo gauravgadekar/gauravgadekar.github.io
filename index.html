@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trace Width</title>
+</head>
+<body>
+    <script src="three.js"></script>
+    <script type='text/javascript' src='dat.gui.min.js'></script>
+    <script type="module" src="GLTFLoader.js"></script>
+    
+    <script type="module">
+        import {GLTFLoader} from "./GLTFLoader.js";
+        import {OrbitControls} from "./OrbitControls.js";
+
+        var dodec;
+        var obj;
+        var params = {
+					width: 0,			
+				};
+
+        var gui = new dat.GUI();
+
+
+
+        var scene= new THREE.Scene();
+
+        var camera= new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth/window.innerHeight,
+            0.001,
+            1000
+        );
+
+
+        var renderer= new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const material = new THREE.MeshStandardMaterial({
+            color: 0xffa400,
+            side: THREE.DoubleSide,
+            flatShading: true,
+            morphTargets: true,
+            });
+
+
+        var loader = new GLTFLoader();
+        
+        loader.load("rect3.gltf", function(gltf){
+            obj=gltf.scene;
+            obj.material=new THREE.MeshLambertMaterial();
+            obj.material.morphTarget = true;
+            obj.rotation.x=0.4;
+            obj.rotation.y=1.2;
+            obj.rotation.z=0;
+            scene.add(gltf.scene);
+            dodec = scene.getObjectByName("Cube");
+
+        });
+
+
+
+        var folder = gui.addFolder('morph targets');
+
+        folder.add(params,'width',0,1).step( 0.01 ).onChange(function (value) 
+        {
+        dodec.morphTargetInfluences[0] = value;
+        });
+
+        folder.open();
+
+
+        scene.background = new THREE.Color(0x002233);
+        var light =new THREE.HemisphereLight(0xFFFFFF,0x000000, 2);
+        camera.position.set(0,0,8);
+        var controls;
+        controls= new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping=true;
+        controls.dampingFactor=0.1;
+        
+        scene.add(light);
+
+
+
+
+        function animate(){
+            requestAnimationFrame(animate);
+            renderer.render(scene,camera);
+
+            controls.update();
+        }
+        animate();
+
+    </script>
+</body>
+</html>
